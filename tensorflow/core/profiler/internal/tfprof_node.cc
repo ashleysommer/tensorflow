@@ -21,7 +21,9 @@ namespace tensorflow {
 namespace tfprof {
 namespace {
 bool CountAsAcceleratorTime(const string& device) {
-  return device.find("stream:all") != device.npos;
+  string dev = str_util::Lowercase(device);
+  return dev.find("stream:all") != device.npos
+         || dev.find("sycl") != device.npos;
 }
 
 bool CountAsCPUTime(const string& device) {
