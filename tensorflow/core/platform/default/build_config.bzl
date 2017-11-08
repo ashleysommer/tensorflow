@@ -440,14 +440,16 @@ def tf_kernel_tests_linkstatic():
   return 0
 
 def tf_additional_lib_defines():
+  """Additional defines needed to build TF libraries."""
   return select({
       "//tensorflow:with_jemalloc_linux_x86_64": ["TENSORFLOW_USE_JEMALLOC"],
       "//tensorflow:with_jemalloc_linux_ppc64le":["TENSORFLOW_USE_JEMALLOC"],
       "//conditions:default": [],
-  })
+  }) + if_not_mobile(["TENSORFLOW_USE_ABSL"])
 
 def tf_additional_lib_deps():
-  return if_static(
+  """Additional dependencies needed to build TF libraries."""
+  return if_not_mobile(["@com_google_absl//absl/base:base"]) + if_static(
       ["@nsync//:nsync_cpp"],
       ["@nsync//:nsync_headers"]
   ) + select({
@@ -467,6 +469,11 @@ def tf_additional_core_deps():
   }) + select({
       "//tensorflow:with_hdfs_support": [
           "//tensorflow/core/platform/hadoop:hadoop_file_system",
+      ],
+      "//conditions:default": [],
+  }) + select({
+      "//tensorflow:with_s3_support": [
+          "//tensorflow/core/platform/s3:s3_file_system",
       ],
       "//conditions:default": [],
   })

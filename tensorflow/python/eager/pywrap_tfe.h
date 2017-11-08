@@ -87,4 +87,34 @@ TFE_TensorHandle* EagerTensorHandle(const PyObject* o);
 // newly created type, or nullptr on error.
 PyObject* TFE_Py_InitEagerTensor(PyObject* base_class);
 
+PyObject* TFE_Py_NewTape();
+PyObject* TFE_Py_TapeShouldRecord(PyObject* py_tape, PyObject* tensors);
+void TFE_Py_TapeWatch(PyObject* tape, tensorflow::int64 tensor_id);
+void TFE_Py_TapeDeleteTrace(PyObject* tape, tensorflow::int64 tensor_id);
+
+// Records an operation in the gradient tape. `tape` should point to an object
+// returned by TFE_Py_NewTape. op_type is a string for the operation type, used
+// in the backprop code. output_tensors should be a list of python ops.Tensor
+// objects. input_tensor_ids should be a list of python integers with the ids of
+// the input tensors of the recorded operation. backward_function should be the
+// function to be called during backprop to, given the gradients of the output
+// tensors, produce the gradients of the input tensors.
+void TFE_Py_TapeRecordOperation(PyObject* tape, PyObject* op_type,
+                                PyObject* output_tensors,
+                                PyObject* input_tensor_ids,
+                                PyObject* backward_function);
+PyObject* TFE_Py_TapeExport(PyObject* tape);
+
+// Returns an EagerTensor of dimension [len(`tensor_list`)] containing
+// the `slice_dim`'th dimension of each tensor in `tensor_list`. In other words,
+// TFE_Py_TensorShapeSlice takes a slice of dimensions of tensors in
+// `tensor_list`. For example, if `tensor_list` contains tensors of with shapes
+// [1, 2, 3], [4, 5], [6, 7, 8, 9], TFE_Py_TensorShapeSlice called with
+// `slice_dim` equal to 1 will return [2, 5, 7].
+// On error, returns nullptr and sets python exception.
+// REQUIRES: `tensor_list` is a python list of EagerTensors
+// REQUIRES: `slice_dim` is non-negative and smaller than the rank of all
+//   tensors in `tensor_list`.
+PyObject* TFE_Py_TensorShapeSlice(PyObject* tensor_list, int slice_dim);
+
 #endif  // TENSORFLOW_PYTHON_EAGER_PYWRAP_TFE_H_

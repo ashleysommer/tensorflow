@@ -47,7 +47,9 @@ def add_sycl_env_vars_to_flags(flags):
   """Add required env vars to compiler flags as needed for ComputeCpp."""
   extra_env_vars = [
       '-DTENSORFLOW_USE_SYCL=1',
-      '-DEIGEN_USE_SYCL=1'
+      '-DEIGEN_USE_SYCL=1',
+      '-Wno-unused-const-variable',
+      '-Wno-unused-command-line-argument'
   ]
   # If TF_VECTORIZE_SYCL is defined and positive, don't add the flag to disable
   # vectorisation
